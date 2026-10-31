@@ -1,0 +1,106 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: '1.26'
+
+      - name: Generate coverage
+        working-directory: testdata/demo
+        run: go test -coverprofile=coverage.out ./...
+
+      - name: Passes when above thresholds
+        id: pass
+        uses: ./
+        with:
+          version: "0.6.1"
+          working-directory: testdata/demo
+          statement-threshold: "40"
+          block-threshold: "40"
+          no-color: "true"
+
+      - name: Verify Docker is used on Linux and a build elsewhere
+        shell: bash
+        run: |
+          expected=build
+          if [ "$RUNNER_OS" = "Linux" ]; then expected=docker; fi
+          if [ "${{ steps.pass.outputs.mode }}" != "$expected" ]; then
+            echo "expected mode '$expected', got '${{ steps.pass.outputs.mode }}'"
+            exit 1
+          fi
+
+      - name: Save history
+        uses: ./
+        with:
+          version: "0.6.1"
+          working-directory: testdata/demo
+          statement-threshold: "40"
+          block-threshold: "40"
+          save-history: "true"
+          history-file: history.json
+          label: ci
+          no-color: "true"
+
+      - name: Verify history file is readable and owned by the runner user
+        shell: bash
+        run: |
+          test -r testdata/demo/history.json
+          find testdata/demo/history.json -user "$(id -un)" | grep -q .
+
+      - name: Show history without a coverage file
+        uses: ./
+        with:
+          version: "0.6.1"
+          working-directory: testdata/demo
+          coverage-file: does-not-exist.out
+          show-history: "true"
+          history-file: history.json
+          no-color: "true"
+
+      - name: Fails when below thresholds
+        id: below
+        continue-on-error: true
+        uses: ./
+        with:
+          version: "0.6.1"
+          working-directory: testdata/demo
+          statement-threshold: "99"
+          no-color: "true"
+
+      - name: Verify the threshold failure
+        if: steps.below.outcome != 'failure'
+        run: |
+          echo "expected the threshold step to fail"
+          exit 1
+
+      - name: Fails when the coverage file is missing
+        id: missing
+        continue-on-error: true
+        uses: ./
+        with:
+          version: "0.6.1"
+          coverage-file: does-not-exist.out
+
+      - name: Verify the missing file failure
+        if: steps.missing.outcome != 'failure'
+        run: |
+          echo "expected the missing file step to fail"
+          exit 1
