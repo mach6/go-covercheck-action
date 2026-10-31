@@ -1,0 +1,280 @@
+name: 'go-covercheck'
+description: 'Enforce test coverage thresholds in Go projects'
+author: 'mach6'
+branding:
+  icon: 'shield'
+  color: 'green'
+
+inputs:
+  coverage-file:
+    description: 'Path to the coverage profile file'
+    required: false
+    default: 'coverage.out'
+  config-file:
+    description: 'Path to the go-covercheck config file'
+    required: false
+    default: ''
+  statement-threshold:
+    description: 'Global statement threshold percentage to enforce'
+    required: false
+    default: ''
+  block-threshold:
+    description: 'Global block threshold percentage to enforce'
+    required: false
+    default: ''
+  total-statement-threshold:
+    description: 'Total statement threshold percentage to enforce'
+    required: false
+    default: ''
+  total-block-threshold:
+    description: 'Total block threshold percentage to enforce'
+    required: false
+    default: ''
+  format:
+    description: 'Output format (table|json|yaml|md|html|csv|tsv)'
+    required: false
+    default: ''
+  sort-by:
+    description: 'Column to sort results by'
+    required: false
+    default: ''
+  sort-order:
+    description: 'Sort order (asc|desc)'
+    required: false
+    default: ''
+  skip:
+    description: 'Regex patterns of files/packages to skip (newline or comma separated)'
+    required: false
+    default: ''
+  no-table:
+    description: 'Hide the results table (true|false)'
+    required: false
+    default: 'false'
+  no-summary:
+    description: 'Hide the summary (true|false)'
+    required: false
+    default: 'false'
+  no-color:
+    description: 'Disable color output (true|false)'
+    required: false
+    default: 'false'
+  term-width:
+    description: 'Terminal width override'
+    required: false
+    default: ''
+  save-history:
+    description: 'Save the coverage result to history (true|false)'
+    required: false
+    default: 'false'
+  history-file:
+    description: 'Path to the history file'
+    required: false
+    default: ''
+  label:
+    description: 'Label for the history entry'
+    required: false
+    default: ''
+  compare-history:
+    description: 'Compare against a history entry (ref or label)'
+    required: false
+    default: ''
+  show-history:
+    description: 'Show history instead of checking coverage (true|false)'
+    required: false
+    default: 'false'
+  limit-history:
+    description: 'Limit the number of history entries shown'
+    required: false
+    default: ''
+  line-threshold:
+    description: 'Global line threshold percentage to enforce'
+    required: false
+    default: ''
+  total-line-threshold:
+    description: 'Total line threshold percentage to enforce'
+    required: false
+    default: ''
+  function-threshold:
+    description: 'Global function threshold percentage to enforce'
+    required: false
+    default: ''
+  total-function-threshold:
+    description: 'Total function threshold percentage to enforce'
+    required: false
+    default: ''
+  table-style:
+    description: 'Table style for the table output'
+    required: false
+    default: ''
+  diff-from:
+    description: 'Only enforce coverage on code changed since this git ref'
+    required: false
+    default: ''
+  module-name:
+    description: 'Go module name override'
+    required: false
+    default: ''
+  no-uncovered-lines:
+    description: 'Hide uncovered lines (true|false)'
+    required: false
+    default: 'false'
+  no-uncovered-functions:
+    description: 'Hide uncovered functions (true|false)'
+    required: false
+    default: 'false'
+  comment:
+    description: 'Post results as a comment on the pull request (true|false). Needs pull-requests write permission'
+    required: false
+    default: 'false'
+  comment-token:
+    description: 'Token used to post the comment'
+    required: false
+    default: '${{ github.token }}'
+  version:
+    description: 'go-covercheck release to use (without or with leading v). Linux runs the ghcr.io/mach6/go-covercheck image, other runners build it with go install'
+    required: false
+    default: '0.6.1'
+  working-directory:
+    description: 'Directory (relative to the workspace) to run go-covercheck in'
+    required: false
+    default: '.'
+
+outputs:
+  mode:
+    description: 'How go-covercheck was run: docker or build'
+    value: ${{ steps.run.outputs.mode }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run go-covercheck
+      id: run
+      shell: bash
+      env:
+        INPUT_COVERAGE_FILE: ${{ inputs.coverage-file }}
+        INPUT_CONFIG_FILE: ${{ inputs.config-file }}
+        INPUT_STATEMENT_THRESHOLD: ${{ inputs.statement-threshold }}
+        INPUT_BLOCK_THRESHOLD: ${{ inputs.block-threshold }}
+        INPUT_TOTAL_STATEMENT_THRESHOLD: ${{ inputs.total-statement-threshold }}
+        INPUT_TOTAL_BLOCK_THRESHOLD: ${{ inputs.total-block-threshold }}
+        INPUT_FORMAT: ${{ inputs.format }}
+        INPUT_SORT_BY: ${{ inputs.sort-by }}
+        INPUT_SORT_ORDER: ${{ inputs.sort-order }}
+        INPUT_SKIP: ${{ inputs.skip }}
+        INPUT_NO_TABLE: ${{ inputs.no-table }}
+        INPUT_NO_SUMMARY: ${{ inputs.no-summary }}
+        INPUT_NO_COLOR: ${{ inputs.no-color }}
+        INPUT_TERM_WIDTH: ${{ inputs.term-width }}
+        INPUT_SAVE_HISTORY: ${{ inputs.save-history }}
+        INPUT_HISTORY_FILE: ${{ inputs.history-file }}
+        INPUT_LABEL: ${{ inputs.label }}
+        INPUT_COMPARE_HISTORY: ${{ inputs.compare-history }}
+        INPUT_SHOW_HISTORY: ${{ inputs.show-history }}
+        INPUT_LIMIT_HISTORY: ${{ inputs.limit-history }}
+        INPUT_LINE_THRESHOLD: ${{ inputs.line-threshold }}
+        INPUT_TOTAL_LINE_THRESHOLD: ${{ inputs.total-line-threshold }}
+        INPUT_FUNCTION_THRESHOLD: ${{ inputs.function-threshold }}
+        INPUT_TOTAL_FUNCTION_THRESHOLD: ${{ inputs.total-function-threshold }}
+        INPUT_TABLE_STYLE: ${{ inputs.table-style }}
+        INPUT_DIFF_FROM: ${{ inputs.diff-from }}
+        INPUT_MODULE_NAME: ${{ inputs.module-name }}
+        INPUT_NO_UNCOVERED_LINES: ${{ inputs.no-uncovered-lines }}
+        INPUT_NO_UNCOVERED_FUNCTIONS: ${{ inputs.no-uncovered-functions }}
+        INPUT_COMMENT: ${{ inputs.comment }}
+        INPUT_COMMENT_TOKEN: ${{ inputs.comment-token }}
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        GH_REPOSITORY: ${{ github.repository }}
+        GH_PR_NUMBER: ${{ github.event.pull_request.number }}
+        GH_SERVER_URL: ${{ github.server_url }}
+      run: |
+        set -euo pipefail
+        workdir="${INPUT_WORKING_DIRECTORY:-.}"
+        if [ "$INPUT_SHOW_HISTORY" != "true" ] && [ ! -f "$workdir/$INPUT_COVERAGE_FILE" ]; then
+          echo "::error::Coverage file '$workdir/$INPUT_COVERAGE_FILE' not found"
+          exit 1
+        fi
+        args=("$INPUT_COVERAGE_FILE")
+
+        add_value() { # flag value
+          if [ -n "$2" ]; then args+=("--$1=$2"); fi
+        }
+        add_bool() { # flag value
+          if [ "$2" = "true" ]; then args+=("--$1"); fi
+        }
+
+        add_value config "$INPUT_CONFIG_FILE"
+        add_value statement-threshold "$INPUT_STATEMENT_THRESHOLD"
+        add_value block-threshold "$INPUT_BLOCK_THRESHOLD"
+        add_value total-statement-threshold "$INPUT_TOTAL_STATEMENT_THRESHOLD"
+        add_value total-block-threshold "$INPUT_TOTAL_BLOCK_THRESHOLD"
+        add_value format "$INPUT_FORMAT"
+        add_value sort-by "$INPUT_SORT_BY"
+        add_value sort-order "$INPUT_SORT_ORDER"
+        add_value term-width "$INPUT_TERM_WIDTH"
+        add_value history-file "$INPUT_HISTORY_FILE"
+        add_value label "$INPUT_LABEL"
+        add_value compare-history "$INPUT_COMPARE_HISTORY"
+        add_value limit-history "$INPUT_LIMIT_HISTORY"
+        add_value line-threshold "$INPUT_LINE_THRESHOLD"
+        add_value total-line-threshold "$INPUT_TOTAL_LINE_THRESHOLD"
+        add_value function-threshold "$INPUT_FUNCTION_THRESHOLD"
+        add_value total-function-threshold "$INPUT_TOTAL_FUNCTION_THRESHOLD"
+        add_value table-style "$INPUT_TABLE_STYLE"
+        add_value diff-from "$INPUT_DIFF_FROM"
+        add_value module-name "$INPUT_MODULE_NAME"
+        add_bool no-uncovered-lines "$INPUT_NO_UNCOVERED_LINES"
+        add_bool no-uncovered-functions "$INPUT_NO_UNCOVERED_FUNCTIONS"
+        add_bool no-table "$INPUT_NO_TABLE"
+        add_bool no-summary "$INPUT_NO_SUMMARY"
+        add_bool no-color "$INPUT_NO_COLOR"
+        add_bool save-history "$INPUT_SAVE_HISTORY"
+        add_bool show-history "$INPUT_SHOW_HISTORY"
+
+        # One --skip per newline- or comma-separated pattern.
+        while IFS= read -r pattern; do
+          pattern="${pattern#"${pattern%%[![:space:]]*}"}"   # trim leading whitespace only
+          pattern="${pattern%"${pattern##*[![:space:]]}"}"   # trim trailing whitespace only
+          if [ -n "$pattern" ]; then args+=("--skip=$pattern"); fi
+        done <<< "$(echo "$INPUT_SKIP" | tr ',' '\n')"
+
+        # PR comment (GitHub only; needs a pull_request event)
+        if [ "$INPUT_COMMENT" = "true" ]; then
+          if [ -z "$GH_PR_NUMBER" ]; then
+            echo "::warning::comment requested but this is not a pull_request event; skipping the comment"
+          else
+            export GITHUB_TOKEN="$INPUT_COMMENT_TOKEN"
+            args+=(--comment --comment-platform=github --comment-base-url="$GH_SERVER_URL" \
+              --comment-repository="$GH_REPOSITORY" --comment-pr="$GH_PR_NUMBER" \
+              --comment-update)
+          fi
+        fi
+
+
+        # v1.2.3 -> 1.2.3 for the image tag; Go modules want the leading v for releases
+        version="${INPUT_VERSION#v}"
+        if [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then gover="v$version"; else gover="$version"; fi
+
+        if [ "$RUNNER_OS" = "Linux" ] && docker info >/dev/null 2>&1; then
+          image="ghcr.io/mach6/go-covercheck:$version"
+          echo "mode=docker" >> "$GITHUB_OUTPUT"
+          echo "Running $image: go-covercheck ${args[*]}"
+          # Run as the runner user so files the CLI writes (history) stay readable, and mount the host
+          # CA bundle because the scratch image has none (needed for PR comments over HTTPS).
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -v "$GITHUB_WORKSPACE:/github/workspace" -w "/github/workspace/$workdir" \
+            -v /etc/ssl/certs:/etc/ssl/certs:ro \
+            -e GITHUB_TOKEN -e GITHUB_ACTIONS -e NO_COLOR \
+            "$image" /go-covercheck "${args[@]}"
+        else
+          if ! command -v go >/dev/null 2>&1; then
+            echo "::error::Go is required on this runner. Add actions/setup-go before this action."
+            exit 1
+          fi
+          echo "mode=build" >> "$GITHUB_OUTPUT"
+          echo "Building go-covercheck@$gover"
+          GOBIN="$RUNNER_TEMP/go-covercheck-bin" go install "github.com/mach6/go-covercheck/cmd/go-covercheck@$gover"
+          cd "$workdir"
+          echo "Running: go-covercheck ${args[*]}"
+          "$RUNNER_TEMP/go-covercheck-bin/go-covercheck" "${args[@]}"
+        fi
