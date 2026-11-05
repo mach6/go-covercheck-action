@@ -22,8 +22,7 @@ steps:
 - **Linux runners:** runs the prebuilt `ghcr.io/mach6/go-covercheck:<version>` image. Nothing is compiled.
 - **macOS, Windows, or Linux without Docker:** builds that release with `go install` (needs `actions/setup-go`).
 
-The CLI release is chosen by the `version` input, which defaults to a released version (currently `0.6.1`).
-Inputs for newer CLI features (line and function thresholds, `comment`, `diff-from`, `table-style`, `no-uncovered-*`) need a CLI release that has them, so set `version` accordingly.
+The CLI release is chosen by the `version` input, which defaults to `0.7.0`. Building that release needs Go 1.27 or newer.
 Inputs are passed to the script as environment variables, never interpolated into the shell.
 
 `comment: true` posts the results on the pull request and needs `pull-requests: write` permission.
@@ -60,11 +59,12 @@ Inputs are passed to the script as environment variables, never interpolated int
 | `table-style` | Table style for the table output | _(CLI/config default)_ |
 | `diff-from` | Only enforce coverage on code changed since this git ref | _(CLI/config default)_ |
 | `module-name` | Go module name override | _(CLI/config default)_ |
+| `hide-columns` | Columns to leave out of the table, md, html, csv and tsv reports, comma or newline separated (disabled for json, yaml and heatmap) | _(CLI/config default)_ |
 | `no-uncovered-lines` | Hide uncovered lines (true\|false) | `false` |
 | `no-uncovered-functions` | Hide uncovered functions (true\|false) | `false` |
 | `comment` | Post results as a comment on the pull request (true\|false). Needs pull-requests write permission | `false` |
 | `comment-token` | Token used to post the comment | `${{ github.token }}` |
-| `version` | go-covercheck release to use (without or with leading v). Linux runs the ghcr.io/mach6/go-covercheck image, other runners build it with go install | `1.0.0` |
+| `version` | go-covercheck release to use (without or with leading v). Linux runs the ghcr.io/mach6/go-covercheck image, other runners build it with go install | `0.7.0` |
 | `working-directory` | Directory (relative to the workspace) to run go-covercheck in | `.` |
 
 ## License
