@@ -110,6 +110,10 @@ inputs:
     description: 'Only enforce coverage on code changed since this git ref'
     required: false
     default: ''
+  hide-columns:
+    description: 'Columns to leave out of the table, md, html, csv and tsv reports, comma or newline separated (disabled for json, yaml and heatmap)'
+    required: false
+    default: ''
   module-name:
     description: 'Go module name override'
     required: false
@@ -133,7 +137,7 @@ inputs:
   version:
     description: 'go-covercheck release to use (without or with leading v). Linux runs the ghcr.io/mach6/go-covercheck image, other runners build it with go install'
     required: false
-    default: '0.6.1'
+    default: '0.7.0'
   working-directory:
     description: 'Directory (relative to the workspace) to run go-covercheck in'
     required: false
@@ -178,6 +182,7 @@ runs:
         INPUT_TABLE_STYLE: ${{ inputs.table-style }}
         INPUT_DIFF_FROM: ${{ inputs.diff-from }}
         INPUT_MODULE_NAME: ${{ inputs.module-name }}
+        INPUT_HIDE_COLUMNS: ${{ inputs.hide-columns }}
         INPUT_NO_UNCOVERED_LINES: ${{ inputs.no-uncovered-lines }}
         INPUT_NO_UNCOVERED_FUNCTIONS: ${{ inputs.no-uncovered-functions }}
         INPUT_COMMENT: ${{ inputs.comment }}
@@ -223,6 +228,11 @@ runs:
         add_value table-style "$INPUT_TABLE_STYLE"
         add_value diff-from "$INPUT_DIFF_FROM"
         add_value module-name "$INPUT_MODULE_NAME"
+
+        # One list for the CLI: newlines become commas.
+        hide_columns="${INPUT_HIDE_COLUMNS//$'\r'/}"
+        add_value hide-columns "${hide_columns//$'\n'/,}"
+
         add_bool no-uncovered-lines "$INPUT_NO_UNCOVERED_LINES"
         add_bool no-uncovered-functions "$INPUT_NO_UNCOVERED_FUNCTIONS"
         add_bool no-table "$INPUT_NO_TABLE"

@@ -21,7 +21,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: '1.26'
+          go-version: '1.27'
 
       - name: Generate coverage
         working-directory: testdata/demo
@@ -31,10 +31,10 @@ jobs:
         id: pass
         uses: ./
         with:
-          version: "0.6.1"
           working-directory: testdata/demo
           statement-threshold: "40"
           block-threshold: "40"
+          line-threshold: "0"
           no-color: "true"
 
       - name: Verify Docker is used on Linux and a build elsewhere
@@ -50,10 +50,10 @@ jobs:
       - name: Save history
         uses: ./
         with:
-          version: "0.6.1"
           working-directory: testdata/demo
           statement-threshold: "40"
           block-threshold: "40"
+          line-threshold: "0"
           save-history: "true"
           history-file: history.json
           label: ci
@@ -68,19 +68,47 @@ jobs:
       - name: Show history without a coverage file
         uses: ./
         with:
-          version: "0.6.1"
           working-directory: testdata/demo
           coverage-file: does-not-exist.out
           show-history: "true"
           history-file: history.json
           no-color: "true"
 
+      - name: Hide columns, comma and newline separated
+        uses: ./
+        with:
+          working-directory: testdata/demo
+          format: csv
+          hide-columns: |
+            lines,functions
+            statement-percent
+          statement-threshold: "40"
+          block-threshold: "40"
+          line-threshold: "0"
+          no-color: "true"
+
+      - name: Unknown hide column fails
+        id: badcolumn
+        continue-on-error: true
+        uses: ./
+        with:
+          working-directory: testdata/demo
+          hide-columns: nope
+          statement-threshold: "40"
+          block-threshold: "40"
+          line-threshold: "0"
+
+      - name: Verify the unknown hide column failed
+        if: steps.badcolumn.outcome != 'failure'
+        run: |
+          echo "expected the unknown hide column step to fail"
+          exit 1
+
       - name: Fails when below thresholds
         id: below
         continue-on-error: true
         uses: ./
         with:
-          version: "0.6.1"
           working-directory: testdata/demo
           statement-threshold: "99"
           no-color: "true"
@@ -96,7 +124,6 @@ jobs:
         continue-on-error: true
         uses: ./
         with:
-          version: "0.6.1"
           coverage-file: does-not-exist.out
 
       - name: Verify the missing file failure
